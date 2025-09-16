@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import WeightDisplay from "@/components/WeightDisplay";
@@ -15,9 +14,9 @@ import Header from "@/components/Header";
 import { ShoppingCart, Package, History } from "lucide-react";
 import type { Product, CartItem, InsertProduct, Transaction, TransactionItem } from "@shared/schema";
 
-interface TransactionWithItems extends Transaction {
-  items: TransactionItem[];
-}
+// interface TransactionWithItems extends Transaction {
+//   items: TransactionItem[];
+// }
 
 export default function CashierSystem() {
   const { toast } = useToast();
@@ -42,11 +41,13 @@ export default function CashierSystem() {
   // API Mutations
   const createTransactionMutation = useMutation({
     mutationFn: async (data: { transaction: any; items: any[] }) => {
-      return apiRequest('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest("POST", "/api/transactions",  data);
+      return response.json();
+      // return apiRequest('/api/transactions', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(data)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
@@ -55,11 +56,13 @@ export default function CashierSystem() {
 
   const createProductMutation = useMutation({
     mutationFn: async (product: InsertProduct) => {
-      return apiRequest('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("POST", "/api/products",  product);
+      return response.json();
+      // return apiRequest('/api/products', {
+      //   method: "POST",
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -68,11 +71,13 @@ export default function CashierSystem() {
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, product }: { id: string; product: InsertProduct }) => {
-      return apiRequest(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("PUT", `/api/products/${id}`,  product);
+      return response.json();
+      // return apiRequest(`/api/products/${id}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -81,9 +86,10 @@ export default function CashierSystem() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: string) => {
-      return apiRequest(`/api/products/${productId}`, {
-        method: 'DELETE'
-      });
+      await apiRequest("DELETE", `/api/products/${productId}`);
+      // return apiRequest(`/api/products/${productId}`, {
+      //   method: 'DELETE'
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });

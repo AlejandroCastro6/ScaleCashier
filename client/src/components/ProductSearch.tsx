@@ -2,10 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Search, Package, ArrowDown } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 interface ProductSearchProps {
@@ -83,7 +82,7 @@ export default function ProductSearch({
   const handleSelectProduct = (product: Product) => {
     onSelectProduct(product);
     setSearchQuery("");
-    setFilteredProducts([]);
+    // setFilteredProducts([]);
     setIsDropdownOpen(false);
     setSelectedIndex(-1);
     inputRef.current?.focus();

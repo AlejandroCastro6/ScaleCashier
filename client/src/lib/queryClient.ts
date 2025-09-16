@@ -12,10 +12,25 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  let finalUrl = url;
+
+  // If GET and data is present, convert to query string
+  if (method.toUpperCase() === "GET" && data) {
+    const params = new URLSearchParams();
+
+    for (const key in data) {
+      if (data[key] !== undefined && data[key] !== null) {
+        params.append(key, data[key]);
+      }
+    }
+
+    finalUrl += `?${params.toString()}`;
+  }
+
+  const res = await fetch(finalUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers: method !== "GET" && data ? { "Content-Type": "application/json" } : {},
+    body: method !== "GET" && data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 
