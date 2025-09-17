@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { History, Search, Receipt, Eye } from "lucide-react";
+import { History, Receipt, Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { Transaction, TransactionItem } from "@shared/schema";
 
@@ -55,17 +55,17 @@ export default function TransactionHistory({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <History className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Transaction History</h3>
+            <h3 className="text-lg font-semibold">Historial de transacciones</h3>
           </div>
           <Badge variant="secondary" data-testid="text-transaction-count">
-            {transactions.length} transactions
+            {transactions.length} transacciones
           </Badge>
         </div>
 
         {/* Search and Summary */}
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="search-date" className="text-sm">Filter by Date</Label>
+            <Label htmlFor="search-date" className="text-sm">Filtrar por fecha</Label>
             <Input
               id="search-date"
               type="date"
@@ -77,13 +77,13 @@ export default function TransactionHistory({
 
           <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
             <div className="text-center">
-              <div className="text-sm text-muted-foreground">Today's Sales</div>
+              <div className="text-sm text-muted-foreground">Ventas del día</div>
               <div className="text-xl font-bold text-primary" data-testid="text-today-total">
                 {formatPrice(todayTotal)}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-sm text-muted-foreground">Transactions</div>
+              <div className="text-sm text-muted-foreground">Transacciones</div>
               <div className="text-xl font-bold">
                 {filteredTransactions.length}
               </div>
@@ -96,8 +96,8 @@ export default function TransactionHistory({
           {filteredTransactions.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <History className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No transactions found</p>
-              {searchDate && <p className="text-sm">Try a different date</p>}
+              <p>No se encontraron transacciones</p>
+              {searchDate && <p className="text-sm">Intenta una fecha diferente</p>}
             </div>
           ) : (
             filteredTransactions.map((transaction) => (
@@ -182,11 +182,11 @@ export default function TransactionHistory({
                       
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
-                          <span className="text-muted-foreground">Received:</span>
+                          <span className="text-muted-foreground">Recibido:</span>
                           <div className="font-medium">{formatPrice(transaction.amountReceived)}</div>
                         </div>
                         <div>
-                          <span className="text-muted-foreground">Change:</span>
+                          <span className="text-muted-foreground">Cambio:</span>
                           <div className="font-medium">{formatPrice(transaction.change)}</div>
                         </div>
                         <div>

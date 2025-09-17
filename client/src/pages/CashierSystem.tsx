@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import WeightDisplay from "@/components/WeightDisplay";
@@ -15,9 +14,9 @@ import Header from "@/components/Header";
 import { ShoppingCart, Package, History } from "lucide-react";
 import type { Product, CartItem, InsertProduct, Transaction, TransactionItem } from "@shared/schema";
 
-interface TransactionWithItems extends Transaction {
-  items: TransactionItem[];
-}
+// interface TransactionWithItems extends Transaction {
+//   items: TransactionItem[];
+// }
 
 export default function CashierSystem() {
   const { toast } = useToast();
@@ -42,11 +41,13 @@ export default function CashierSystem() {
   // API Mutations
   const createTransactionMutation = useMutation({
     mutationFn: async (data: { transaction: any; items: any[] }) => {
-      return apiRequest('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest("POST", "/api/transactions",  data);
+      return response.json();
+      // return apiRequest('/api/transactions', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(data)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
@@ -55,11 +56,13 @@ export default function CashierSystem() {
 
   const createProductMutation = useMutation({
     mutationFn: async (product: InsertProduct) => {
-      return apiRequest('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("POST", "/api/products",  product);
+      return response.json();
+      // return apiRequest('/api/products', {
+      //   method: "POST",
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -68,11 +71,13 @@ export default function CashierSystem() {
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, product }: { id: string; product: InsertProduct }) => {
-      return apiRequest(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("PUT", `/api/products/${id}`,  product);
+      return response.json();
+      // return apiRequest(`/api/products/${id}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -81,9 +86,10 @@ export default function CashierSystem() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: string) => {
-      return apiRequest(`/api/products/${productId}`, {
-        method: 'DELETE'
-      });
+      await apiRequest("DELETE", `/api/products/${productId}`);
+      // return apiRequest(`/api/products/${productId}`, {
+      //   method: 'DELETE'
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -269,32 +275,33 @@ export default function CashierSystem() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header 
-        businessName="My Grocery Store"
-        cashierName="John Doe"
+        businessName="Molino Turó"
+        cashierName="Arturo Castro Ramos"
         onOpenSettings={() => console.log("Open settings")}
+        className={"h-12 px-4 flex items-center shadow-sm"}
       />
       
-      <main className="flex-1 p-6 overflow-hidden">
+      <main className="flex-1 p-4 overflow-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
           <TabsList className="grid w-full grid-cols-3 mb-6" data-testid="tabs-main">
             <TabsTrigger value="pos" className="flex items-center gap-2" data-testid="tab-pos">
               <ShoppingCart className="w-4 h-4" />
-              Point of Sale
+              Punto de venta
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2" data-testid="tab-products">
               <Package className="w-4 h-4" />
-              Products
+              Productos
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" data-testid="tab-history">
               <History className="w-4 h-4" />
-              History
+              Historial
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pos" className="h-full space-y-0">
-            <div className="grid grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column: Products and Scale */}
               <div className="space-y-6">
                 <WeightDisplay 
@@ -303,7 +310,7 @@ export default function CashierSystem() {
                 />
                 <ProductSearch 
                   onSelectProduct={handleSelectProduct}
-                  placeholder="Search by product code or name..."
+                  placeholder="Buscar producto por código o nombre..."
                 />
                 <ProductGrid 
                   products={products.filter(p => p.isActive === 1)}
