@@ -16,6 +16,7 @@ function Router() {
 }
 
 function App() {
+  document.documentElement.classList.add("dark");
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

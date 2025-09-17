@@ -36,7 +36,7 @@ export default function TransactionCart({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <ShoppingCart className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold">Current Transaction</h3>
+          <h3 className="text-lg font-semibold">Transacción actual</h3>
         </div>
         <Badge variant="secondary" data-testid="text-item-count">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
@@ -48,8 +48,8 @@ export default function TransactionCart({
         {items.length === 0 ? (
           <div className="text-center text-muted-foreground py-8" data-testid="text-empty-cart">
             <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No items in cart</p>
-            <p className="text-sm">Select products to add them</p>
+            <p>No hay productos en el carrito</p>
+            <p className="text-sm">Seleccione los productos para agregarlos</p>
           </div>
         ) : (
           items.map((item, index) => (
@@ -64,7 +64,7 @@ export default function TransactionCart({
                     </Badge>
                     {item.taxRate > 0 && (
                       <Badge variant="secondary" className="text-xs">
-                        {item.taxRate}% tax
+                        {item.taxRate}% IVA
                       </Badge>
                     )}
                   </div>
@@ -92,7 +92,7 @@ export default function TransactionCart({
                   </span>
                 </div>
                 <span className="text-muted-foreground">
-                  @ {formatPrice(item.pricePerUnit)} per {item.unit}
+                  @ {formatPrice(item.pricePerUnit)} por {item.unit}
                 </span>
               </div>
 
@@ -106,7 +106,7 @@ export default function TransactionCart({
                 </div>
                 {item.taxAmount > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax ({item.taxRate}%):</span>
+                    <span className="text-muted-foreground">IVA ({item.taxRate}%):</span>
                     <span data-testid={`text-item-tax-${index}`}>
                       {formatPrice(item.taxAmount)}
                     </span>
@@ -137,7 +137,7 @@ export default function TransactionCart({
             </div>
             {taxSum > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Tax:</span>
+                <span className="text-muted-foreground">Total Impuestos:</span>
                 <span data-testid="text-cart-tax">
                   {formatPrice(taxSum)}
                 </span>

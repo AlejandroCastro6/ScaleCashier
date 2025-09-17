@@ -14,7 +14,7 @@ interface ProductSearchProps {
 
 export default function ProductSearch({ 
   onSelectProduct, 
-  placeholder = "Search by product code or name..." 
+  placeholder = "Buscar porducto por código o nombre..."
 }: ProductSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -117,7 +117,7 @@ export default function ProductSearch({
       <Card className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-muted-foreground" />
-          <Label className="text-sm font-medium">Product Search</Label>
+          <Label className="text-sm font-medium">Buscar producto</Label>
         </div>
         
         <div className="relative">
@@ -177,7 +177,7 @@ export default function ProductSearch({
                           {formatPrice(product.pricePerUnit, product.unit)}
                           {parseFloat(product.taxRate) > 0 && (
                             <span className="ml-2">
-                              ({parseFloat(product.taxRate)}% tax)
+                              ({parseFloat(product.taxRate)}% IVA)
                             </span>
                           )}
                         </div>
@@ -197,13 +197,13 @@ export default function ProductSearch({
 
         {searchQuery && searchResults.length === 0 && !isLoading && (
           <div className="text-sm text-muted-foreground text-center py-2">
-            No products found matching "{searchQuery}"
+            No se encontraron productos con el criterio de búsqueda "{searchQuery}"
           </div>
         )}
 
         {isLoading && searchQuery && (
           <div className="text-sm text-muted-foreground text-center py-2">
-            Searching...
+            Buscando...
           </div>
         )}
       </Card>

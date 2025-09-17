@@ -275,32 +275,33 @@ export default function CashierSystem() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header 
-        businessName="My Grocery Store"
-        cashierName="John Doe"
+        businessName="Molino Turó"
+        cashierName="Arturo Castro Ramos"
         onOpenSettings={() => console.log("Open settings")}
+        className={"h-12 px-4 flex items-center shadow-sm"}
       />
       
-      <main className="flex-1 p-6 overflow-hidden">
+      <main className="flex-1 p-4 overflow-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
           <TabsList className="grid w-full grid-cols-3 mb-6" data-testid="tabs-main">
             <TabsTrigger value="pos" className="flex items-center gap-2" data-testid="tab-pos">
               <ShoppingCart className="w-4 h-4" />
-              Point of Sale
+              Punto de venta
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2" data-testid="tab-products">
               <Package className="w-4 h-4" />
-              Products
+              Productos
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" data-testid="tab-history">
               <History className="w-4 h-4" />
-              History
+              Historial
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pos" className="h-full space-y-0">
-            <div className="grid grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column: Products and Scale */}
               <div className="space-y-6">
                 <WeightDisplay 
@@ -309,7 +310,7 @@ export default function CashierSystem() {
                 />
                 <ProductSearch 
                   onSelectProduct={handleSelectProduct}
-                  placeholder="Search by product code or name..."
+                  placeholder="Buscar producto por código o nombre..."
                 />
                 <ProductGrid 
                   products={products.filter(p => p.isActive === 1)}

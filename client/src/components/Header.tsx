@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Moon, Sun, Settings, User } from "lucide-react";
 
 interface HeaderProps {
   businessName?: string;
   cashierName?: string;
   onOpenSettings?: () => void;
+  className?: string;
 }
 
 export default function Header({ 
@@ -14,7 +14,7 @@ export default function Header({
   cashierName = "Cashier",
   onOpenSettings 
 }: HeaderProps) {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -23,21 +23,21 @@ export default function Header({
   };
 
   return (
-    <header className="bg-card border-b border-card-border px-6 py-4" data-testid="header-main">
+    <header className="bg-card border-b border-card-border px-3 py-1" data-testid="header-main">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">CP</span>
           </div>
           <div>
-            <h1 className="text-xl font-display font-semibold" data-testid="text-business-name">
+            <h1 className="text-base font-display font-semibold" data-testid="text-business-name">
               {businessName}
             </h1>
-            <p className="text-sm text-muted-foreground">Point of Sale System</p>
+            <p className="text-xs text-muted-foreground">Sistema de peso y facturación</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium" data-testid="text-cashier-name">

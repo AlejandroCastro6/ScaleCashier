@@ -26,7 +26,7 @@ export default function ProductGrid({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Products</h3>
+        <h3 className="text-lg font-semibold">Productos</h3>
         <Badge variant="secondary" data-testid="text-product-count">
           {products.length} items
         </Badge>
@@ -101,7 +101,7 @@ export default function ProductGrid({
                   data-testid={`button-select-${product.id}`}
                 >
                   <Plus className="w-3 h-3 mr-1" />
-                  Add to Cart
+                  Agregar
                 </Button>
               </div>
             </div>
