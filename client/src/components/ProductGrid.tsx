@@ -20,7 +20,8 @@ export default function ProductGrid({
   selectedProductId 
 }: ProductGridProps) {
   const formatPrice = (price: string, unit: string) => {
-    return `$${parseFloat(price).toFixed(2)}/${unit}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) }/${unit}`;
   };
 
   return (

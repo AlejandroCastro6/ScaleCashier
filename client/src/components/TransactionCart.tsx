@@ -18,17 +18,35 @@ export default function TransactionCart({
   onClearCart, 
   onProcessTransaction 
 }: TransactionCartProps) {
-  const subtotalSum = items.reduce((sum, item) => sum + item.subtotal, 0);
+  const roundCOP = (value: number) => {
+    console.log(value, " el value")
+    const reminder = value % 100;
+    console.log(reminder, " remindore")
+    if (reminder === 0) {
+      return value;
+    } else if (reminder < 50) {
+      return value - reminder + 50;
+    }
+    else if (reminder === 50) {
+      return value;
+    } else {
+      return value -reminder + 100
+    }
+  }
+  let subtotalSum = items.reduce((sum, item) => sum + item.subtotal, 0);
+  subtotalSum = roundCOP(subtotalSum)
   const taxSum = items.reduce((sum, item) => sum + item.taxAmount, 0);
   const total = items.reduce((sum, item) => sum + item.total, 0);
+  console.log("subtotalsum",subtotalSum," tax sum:", taxSum, " total:",total);
   const itemCount = items.length;
 
-  const formatWeight = (weight: number, unit: string) => {
-    return `${weight.toFixed(3)} ${unit}`;
+  const formatWeight = (weight: number) => {
+    return `${weight.toFixed(4)} kg`;
   };
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits:0 }) }`;
   };
 
   return (
@@ -158,7 +176,7 @@ export default function TransactionCart({
               onClick={onClearCart}
               data-testid="button-clear-cart"
             >
-              Clear Cart
+              Limpiar Carrito
             </Button>
             <Button 
               onClick={onProcessTransaction}
@@ -166,7 +184,7 @@ export default function TransactionCart({
               data-testid="button-process-transaction"
             >
               <Receipt className="w-4 h-4" />
-              Process
+              Facturar
             </Button>
           </div>
         </div>

@@ -70,7 +70,7 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
           }
           if (value) {
             const raw = decoder.decode(value);
-            console.log("Raw data from scale:", raw);
+            // console.log("Raw data from scale:", raw);
 
             // Example parsing: extract first number
             const match = raw.match(/([0-9]*\.?[0-9]+)/);

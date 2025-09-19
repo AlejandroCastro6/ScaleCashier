@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { DollarSign, Calculator, Check, X } from "lucide-react";
+import { DollarSign, Check, X } from "lucide-react";
 import type { CartItem } from "@shared/schema";
 
 interface PaymentModalProps {
@@ -59,14 +59,16 @@ export default function PaymentModal({
   };
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits:0 }) }`;
   };
 
   const quickAmounts = [
     total, // Exact amount
     Math.ceil(total), // Round up to nearest dollar
-    Math.ceil(total / 5) * 5, // Round up to nearest $5
-    Math.ceil(total / 10) * 10, // Round up to nearest $10
+    Math.ceil(total / 200) * 200, // Round up to nearest $500
+    Math.ceil(total / 2000) * 2000, // Round up to nearest $2000
+    Math.ceil(total / 10000) * 10000, // Round up to nearest $10000
   ].filter((amount, index, arr) => arr.indexOf(amount) === index); // Remove duplicates
 
   return (
@@ -75,7 +77,7 @@ export default function PaymentModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <DollarSign className="w-5 h-5" />
-            Process Payment
+            Procesar Pago
           </DialogTitle>
         </DialogHeader>
 
@@ -83,12 +85,12 @@ export default function PaymentModal({
           {/* Left: Transaction Summary */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Transaction Summary</Label>
+              <Label className="text-sm font-medium">Resumen de la transacción</Label>
               <div className="space-y-1 text-sm">
                 {items.map((item, index) => (
                   <div key={index} className="flex justify-between" data-testid={`text-summary-item-${index}`}>
                     <span className="truncate">
-                      {item.productName} ({item.weight.toFixed(3)} {item.unit})
+                      {item.productName} ({item.weight.toFixed(4)} {item.unit})
                     </span>
                     <span>{formatPrice(item.subtotal)}</span>
                   </div>
@@ -107,14 +109,14 @@ export default function PaymentModal({
               </div>
 
               <div className="flex justify-between text-lg">
-                <span>Amount Received:</span>
+                <span>Monto recibido:</span>
                 <span data-testid="text-amount-received">
                   {formatPrice(receivedAmount)}
                 </span>
               </div>
 
               <div className={`flex justify-between text-lg font-semibold ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                <span>Change:</span>
+                <span>Cambio:</span>
                 <span data-testid="text-change-amount">
                   {formatPrice(Math.max(0, change))}
                 </span>
@@ -125,7 +127,7 @@ export default function PaymentModal({
           {/* Right: Payment Input */}
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="amount-received">Amount Received</Label>
+              <Label htmlFor="amount-received">Monto Recibido</Label>
               <Input
                 id="amount-received"
                 type="number"
@@ -133,7 +135,7 @@ export default function PaymentModal({
                 value={amountReceived}
                 onChange={(e) => setAmountReceived(e.target.value)}
                 className="text-xl text-center"
-                step="0.01"
+                step="100.00"
                 min="0"
                 data-testid="input-amount-received"
               />
@@ -141,7 +143,7 @@ export default function PaymentModal({
 
             {/* Quick Amount Buttons */}
             <div className="space-y-2">
-              <Label className="text-sm">Quick Amounts</Label>
+              <Label className="text-sm">Valores rápidos</Label>
               <div className="grid grid-cols-2 gap-2">
                 {quickAmounts.map((amount) => (
                   <Button
@@ -158,7 +160,7 @@ export default function PaymentModal({
 
             {/* Number Pad */}
             <div className="space-y-2">
-              <Label className="text-sm">Number Pad</Label>
+              <Label className="text-sm">Teclado numérico</Label>
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                   <Button
@@ -202,7 +204,7 @@ export default function PaymentModal({
                 className="w-full"
                 data-testid="button-clear-amount"
               >
-                Clear
+                Borrar
               </Button>
             </div>
           </div>
@@ -216,7 +218,7 @@ export default function PaymentModal({
             data-testid="button-cancel-payment"
           >
             <X className="w-4 h-4 mr-2" />
-            Cancel
+            Cancelar
           </Button>
           
           <Button 
@@ -226,7 +228,7 @@ export default function PaymentModal({
             data-testid="button-complete-payment"
           >
             <Check className="w-4 h-4" />
-            {isProcessing ? "Processing..." : "Complete Payment"}
+            {isProcessing ? "Procesando..." : "Completar Pago"}
           </Button>
         </div>
       </DialogContent>
