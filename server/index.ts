@@ -38,10 +38,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Direct health check to test routing (before any imports that might fail)
-  app.get("/api/test", (req, res) => {
-    res.json({ message: "Direct route test successful", timestamp: new Date().toISOString() });
-  });
+  // Make sure database is set up before starting the server
+  // await migrateDatabase();
 
   const server = await registerRoutes(app);
 
@@ -50,12 +48,7 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    console.error("Unhandled error:", err);
-  });
-
-  // Add explicit 404 handler for API routes to prevent HTML fallback
-  app.use(/^\/api(?:\/|$)/, (_req: Request, res: Response) => {
-    res.status(404).json({ error: "API endpoint not found" });
+    throw err;
   });
 
   // importantly only setup vite in development and after
@@ -67,16 +60,15 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
+  // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = parseInt(process.env.PORT || '5000', 10);
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
+  const port = 5000;
+  const options: any = {port, host:'0.0.0.0'};
+  if (process.platform !== "win32") {
+      options.reusePort = true;
+  }
+  server.listen(options, () => {
+    console.log(`serving on port ${port}`);
   });
 })();

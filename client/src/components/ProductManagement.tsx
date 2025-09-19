@@ -74,7 +74,8 @@ export default function ProductManagement({
   };
 
   const formatPrice = (price: string, unit: string) => {
-    return `$${parseFloat(price).toFixed(2)}/${unit}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits:0 }) }/${unit}`;
   };
 
   const formatTaxRate = (taxRate: string) => {
@@ -90,13 +91,13 @@ export default function ProductManagement({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-primary" />
-            <h3 className="text-lg font-semibold">Product Management</h3>
+            <h3 className="text-lg font-semibold">Gestión de productos</h3>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={handleAddNew} data-testid="button-add-product">
                 <Plus className="w-4 h-4 mr-2" />
-                Add Product
+                Agregar producto
               </Button>
             </DialogTrigger>
             <DialogContent data-testid="dialog-product-form">
@@ -113,7 +114,7 @@ export default function ProductManagement({
                     name="code"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Product Code</FormLabel>
+                        <FormLabel>Código del producto</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="e.g., APL001" 
@@ -132,7 +133,7 @@ export default function ProductManagement({
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Product Name</FormLabel>
+                        <FormLabel>Nombre del producto</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Enter product name" 
@@ -151,7 +152,7 @@ export default function ProductManagement({
                       name="pricePerUnit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Price per Unit</FormLabel>
+                          <FormLabel>Precio por unidad</FormLabel>
                           <FormControl>
                             <Input 
                               type="number" 
@@ -171,7 +172,7 @@ export default function ProductManagement({
                       name="unit"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Unit</FormLabel>
+                          <FormLabel>Unidad</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-product-unit">
@@ -179,8 +180,8 @@ export default function ProductManagement({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="kg">Kilogram (kg)</SelectItem>
-                              <SelectItem value="g">Gram (g)</SelectItem>
+                              <SelectItem value="kg">Kilogramo (kg)</SelectItem>
+                              <SelectItem value="g">Gramo (g)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -195,7 +196,7 @@ export default function ProductManagement({
                       name="taxRate"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tax Rate (%)</FormLabel>
+                          <FormLabel>Tasa impuesto (%)</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger data-testid="select-product-tax-rate">
@@ -203,9 +204,9 @@ export default function ProductManagement({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="0">0% (Tax-free)</SelectItem>
-                              <SelectItem value="5">5% (Reduced rate)</SelectItem>
-                              <SelectItem value="19">19% (Standard rate)</SelectItem>
+                              <SelectItem value="0">0% (sin-IVA)</SelectItem>
+                              <SelectItem value="5">5% (Tasa reducida)</SelectItem>
+                              <SelectItem value="19">19% (Tasa éstandar)</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -218,7 +219,7 @@ export default function ProductManagement({
                       name="category"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Category (Optional)</FormLabel>
+                          <FormLabel>Categorias (Opcional)</FormLabel>
                           <FormControl>
                             <Input 
                               placeholder="e.g., Fruits, Vegetables, Meat" 
@@ -241,7 +242,7 @@ export default function ProductManagement({
                       onClick={() => setIsDialogOpen(false)}
                       data-testid="button-cancel-product"
                     >
-                      Cancel
+                      Cancelar
                     </Button>
                     <Button type="submit" data-testid="button-save-product">
                       {editingProduct ? "Save Changes" : "Add Product"}
@@ -258,8 +259,8 @@ export default function ProductManagement({
           {products.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No products added yet</p>
-              <p className="text-sm">Add your first product to get started</p>
+              <p>No hay productos añadidos aún</p>
+              <p className="text-sm">Añade tu primer producto para empezar</p>
             </div>
           ) : (
             products.map((product) => (
@@ -328,7 +329,7 @@ export default function ProductManagement({
         {/* Categories Summary */}
         {categories.length > 0 && (
           <div className="pt-4 border-t">
-            <Label className="text-sm font-medium mb-2 block">Categories</Label>
+            <Label className="text-sm font-medium mb-2 block">Categorias</Label>
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <Badge key={category} variant="secondary" className="text-xs">

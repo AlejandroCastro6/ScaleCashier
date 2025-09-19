@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import WeightDisplay from "@/components/WeightDisplay";
@@ -15,9 +14,9 @@ import Header from "@/components/Header";
 import { ShoppingCart, Package, History } from "lucide-react";
 import type { Product, CartItem, InsertProduct, Transaction, TransactionItem } from "@shared/schema";
 
-interface TransactionWithItems extends Transaction {
-  items: TransactionItem[];
-}
+// interface TransactionWithItems extends Transaction {
+//   items: TransactionItem[];
+// }
 
 export default function CashierSystem() {
   const { toast } = useToast();
@@ -42,11 +41,13 @@ export default function CashierSystem() {
   // API Mutations
   const createTransactionMutation = useMutation({
     mutationFn: async (data: { transaction: any; items: any[] }) => {
-      return apiRequest('/api/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const response = await apiRequest("POST", "/api/transactions",  data);
+      return response.json();
+      // return apiRequest('/api/transactions', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(data)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
@@ -55,11 +56,13 @@ export default function CashierSystem() {
 
   const createProductMutation = useMutation({
     mutationFn: async (product: InsertProduct) => {
-      return apiRequest('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("POST", "/api/products",  product);
+      return response.json();
+      // return apiRequest('/api/products', {
+      //   method: "POST",
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -68,11 +71,13 @@ export default function CashierSystem() {
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ id, product }: { id: string; product: InsertProduct }) => {
-      return apiRequest(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product)
-      });
+      const response = await apiRequest("PUT", `/api/products/${id}`,  product);
+      return response.json();
+      // return apiRequest(`/api/products/${id}`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(product)
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -81,9 +86,10 @@ export default function CashierSystem() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId: string) => {
-      return apiRequest(`/api/products/${productId}`, {
-        method: 'DELETE'
-      });
+      await apiRequest("DELETE", `/api/products/${productId}`);
+      // return apiRequest(`/api/products/${productId}`, {
+      //   method: 'DELETE'
+      // });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
@@ -95,6 +101,22 @@ export default function CashierSystem() {
     setCurrentWeight(weight);
   };
 
+
+  const roundCOP = (value: number) => {
+    const reminder = value % 100;
+    if (reminder === 0) {
+      return value;
+    } else if (reminder < 50) {
+      return value - reminder + 50;
+    }
+    else if (reminder === 50) {
+      return value;
+    } else {
+      return value -reminder + 100
+    }
+  }
+
+
   const handleSelectProduct = (product: Product) => {
     if (currentWeight <= 0) {
       toast({
@@ -104,11 +126,18 @@ export default function CashierSystem() {
       });
       return;
     }
+    let subtotal
+    if (product.unit === "g") {
+      subtotal = (currentWeight * 1000) * parseFloat(product.pricePerUnit);
+    } else {
+      subtotal = currentWeight * parseFloat(product.pricePerUnit);
+    }
 
-    const subtotal = currentWeight * parseFloat(product.pricePerUnit);
+    // subtotal = roundCOP(subtotal);
     const taxRate = parseFloat(product.taxRate);
     const taxAmount = subtotal * (taxRate / 100);
-    const total = subtotal + taxAmount;
+    let total = subtotal + taxAmount;
+    total = roundCOP(total);
 
     const cartItem: CartItem = {
       productId: product.id,
@@ -127,8 +156,8 @@ export default function CashierSystem() {
     setSelectedProduct(product);
     
     toast({
-      title: "Product Added",
-      description: `${product.name} (${currentWeight.toFixed(3)} ${product.unit}) added to cart.`,
+      title: "Producto añadido",
+      description: `${product.name} (${currentWeight.toFixed(4)} ${product.unit}) agregado al carrito.`,
     });
 
     console.log("Product added to cart:", cartItem);
@@ -137,8 +166,8 @@ export default function CashierSystem() {
   const handleRemoveCartItem = (index: number) => {
     setCartItems(prev => prev.filter((_, i) => i !== index));
     toast({
-      title: "Item Removed",
-      description: "Item removed from cart.",
+      title: "Item removido",
+      description: "Item removido del carrito.",
     });
   };
 
@@ -146,16 +175,16 @@ export default function CashierSystem() {
     setCartItems([]);
     setSelectedProduct(null);
     toast({
-      title: "Cart Cleared",
-      description: "All items removed from cart.",
+      title: "Carrito limpio",
+      description: "Todos los items fueron removidos del carrito.",
     });
   };
 
   const handleProcessTransaction = () => {
     if (cartItems.length === 0) {
       toast({
-        title: "Empty Cart",
-        description: "Add items to cart before processing transaction.",
+        title: "Carrito vacío",
+        description: "Agrega items al carrito para procesar la transacción.",
         variant: "destructive",
       });
       return;
@@ -194,15 +223,15 @@ export default function CashierSystem() {
         setIsPaymentModalOpen(false);
 
         toast({
-          title: "Transaction Complete",
-          description: `Transaction processed successfully. Change: $${change.toFixed(2)}`,
+          title: "Transación completada",
+          description: `Transacción procesada correctamente. Cambio: $${change.toFixed(0)}`,
         });
       },
       onError: (error) => {
-        console.error("Transaction error:", error);
+        console.error("Error en la transsacción:", error);
         toast({
-          title: "Transaction Failed",
-          description: "Failed to process transaction. Please try again.",
+          title: "Transacción fallida",
+          description: "Fallo al procesar la transacción. Pro favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -213,15 +242,15 @@ export default function CashierSystem() {
     createProductMutation.mutate(product, {
       onSuccess: () => {
         toast({
-          title: "Product Added",
-          description: `${product.name} has been added to the product list.`,
+          title: "Producto añadido",
+          description: `${product.name} se ha añadido a la lista de productos.`,
         });
       },
       onError: (error) => {
         console.error("Product creation error:", error);
         toast({
-          title: "Product Creation Failed",
-          description: "Failed to create product. Please try again.",
+          title: "Creación de producto Fallida",
+          description: "Creacion de producto fallida. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -232,15 +261,15 @@ export default function CashierSystem() {
     updateProductMutation.mutate({ id: productId, product: productData }, {
       onSuccess: () => {
         toast({
-          title: "Product Updated",
-          description: "Product has been updated successfully.",
+          title: "Producto acutalizado",
+          description: "El producto ha sido actualizado con éxito.",
         });
       },
       onError: (error) => {
         console.error("Product update error:", error);
         toast({
-          title: "Product Update Failed",
-          description: "Failed to update product. Please try again.",
+          title: "Actualización Fallida",
+          description: "Actualización fallida. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -251,15 +280,15 @@ export default function CashierSystem() {
     deleteProductMutation.mutate(productId, {
       onSuccess: () => {
         toast({
-          title: "Product Deleted",
-          description: "Product has been removed from the list.",
+          title: "Producto Borrado",
+          description: "El producto ha sido removido de la lista.",
         });
       },
       onError: (error) => {
         console.error("Product deletion error:", error);
         toast({
-          title: "Product Deletion Failed",
-          description: "Failed to delete product. Please try again.",
+          title: "Borrado Fallido",
+          description: "Fallo al borrar el producto. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -269,32 +298,33 @@ export default function CashierSystem() {
   const cartTotal = cartItems.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="h-screen flex flex-col bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header 
-        businessName="My Grocery Store"
-        cashierName="John Doe"
+        businessName="Molino Turó"
+        cashierName="Arturo Castro Ramos"
         onOpenSettings={() => console.log("Open settings")}
+        className={"h-12 px-4 flex items-center shadow-sm"}
       />
       
-      <main className="flex-1 p-6 overflow-hidden">
+      <main className="flex-1 p-4 overflow-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
           <TabsList className="grid w-full grid-cols-3 mb-6" data-testid="tabs-main">
             <TabsTrigger value="pos" className="flex items-center gap-2" data-testid="tab-pos">
               <ShoppingCart className="w-4 h-4" />
-              Point of Sale
+              Punto de venta
             </TabsTrigger>
             <TabsTrigger value="products" className="flex items-center gap-2" data-testid="tab-products">
               <Package className="w-4 h-4" />
-              Products
+              Productos
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2" data-testid="tab-history">
               <History className="w-4 h-4" />
-              History
+              Historial
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="pos" className="h-full space-y-0">
-            <div className="grid grid-cols-3 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column: Products and Scale */}
               <div className="space-y-6">
                 <WeightDisplay 
@@ -303,7 +333,7 @@ export default function CashierSystem() {
                 />
                 <ProductSearch 
                   onSelectProduct={handleSelectProduct}
-                  placeholder="Search by product code or name..."
+                  placeholder="Buscar producto por código o nombre..."
                 />
                 <ProductGrid 
                   products={products.filter(p => p.isActive === 1)}

@@ -18,17 +18,35 @@ export default function TransactionCart({
   onClearCart, 
   onProcessTransaction 
 }: TransactionCartProps) {
-  const subtotalSum = items.reduce((sum, item) => sum + item.subtotal, 0);
+  const roundCOP = (value: number) => {
+    console.log(value, " el value")
+    const reminder = value % 100;
+    console.log(reminder, " remindore")
+    if (reminder === 0) {
+      return value;
+    } else if (reminder < 50) {
+      return value - reminder + 50;
+    }
+    else if (reminder === 50) {
+      return value;
+    } else {
+      return value -reminder + 100
+    }
+  }
+  let subtotalSum = items.reduce((sum, item) => sum + item.subtotal, 0);
+  subtotalSum = roundCOP(subtotalSum)
   const taxSum = items.reduce((sum, item) => sum + item.taxAmount, 0);
   const total = items.reduce((sum, item) => sum + item.total, 0);
+  console.log("subtotalsum",subtotalSum," tax sum:", taxSum, " total:",total);
   const itemCount = items.length;
 
-  const formatWeight = (weight: number, unit: string) => {
-    return `${weight.toFixed(3)} ${unit}`;
+  const formatWeight = (weight: number) => {
+    return `${weight.toFixed(4)} kg`;
   };
 
   const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits:0 }) }`;
   };
 
   return (
@@ -36,7 +54,7 @@ export default function TransactionCart({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <ShoppingCart className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold">Current Transaction</h3>
+          <h3 className="text-lg font-semibold">Transacción actual</h3>
         </div>
         <Badge variant="secondary" data-testid="text-item-count">
           {itemCount} {itemCount === 1 ? 'item' : 'items'}
@@ -48,8 +66,8 @@ export default function TransactionCart({
         {items.length === 0 ? (
           <div className="text-center text-muted-foreground py-8" data-testid="text-empty-cart">
             <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No items in cart</p>
-            <p className="text-sm">Select products to add them</p>
+            <p>No hay productos en el carrito</p>
+            <p className="text-sm">Seleccione los productos para agregarlos</p>
           </div>
         ) : (
           items.map((item, index) => (
@@ -64,7 +82,7 @@ export default function TransactionCart({
                     </Badge>
                     {item.taxRate > 0 && (
                       <Badge variant="secondary" className="text-xs">
-                        {item.taxRate}% tax
+                        {item.taxRate}% IVA
                       </Badge>
                     )}
                   </div>
@@ -92,7 +110,7 @@ export default function TransactionCart({
                   </span>
                 </div>
                 <span className="text-muted-foreground">
-                  @ {formatPrice(item.pricePerUnit)} per {item.unit}
+                  @ {formatPrice(item.pricePerUnit)} por {item.unit}
                 </span>
               </div>
 
@@ -106,7 +124,7 @@ export default function TransactionCart({
                 </div>
                 {item.taxAmount > 0 && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax ({item.taxRate}%):</span>
+                    <span className="text-muted-foreground">IVA ({item.taxRate}%):</span>
                     <span data-testid={`text-item-tax-${index}`}>
                       {formatPrice(item.taxAmount)}
                     </span>
@@ -137,7 +155,7 @@ export default function TransactionCart({
             </div>
             {taxSum > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Tax:</span>
+                <span className="text-muted-foreground">Total Impuestos:</span>
                 <span data-testid="text-cart-tax">
                   {formatPrice(taxSum)}
                 </span>
@@ -158,7 +176,7 @@ export default function TransactionCart({
               onClick={onClearCart}
               data-testid="button-clear-cart"
             >
-              Clear Cart
+              Limpiar Carrito
             </Button>
             <Button 
               onClick={onProcessTransaction}
@@ -166,7 +184,7 @@ export default function TransactionCart({
               data-testid="button-process-transaction"
             >
               <Receipt className="w-4 h-4" />
-              Process
+              Facturar
             </Button>
           </div>
         </div>

@@ -2,10 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Search, Package, ArrowDown } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 interface ProductSearchProps {
@@ -15,7 +14,7 @@ interface ProductSearchProps {
 
 export default function ProductSearch({ 
   onSelectProduct, 
-  placeholder = "Search by product code or name..." 
+  placeholder = "Buscar porducto por código o nombre..."
 }: ProductSearchProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -83,7 +82,7 @@ export default function ProductSearch({
   const handleSelectProduct = (product: Product) => {
     onSelectProduct(product);
     setSearchQuery("");
-    setFilteredProducts([]);
+    // setFilteredProducts([]);
     setIsDropdownOpen(false);
     setSelectedIndex(-1);
     inputRef.current?.focus();
@@ -110,7 +109,8 @@ export default function ProductSearch({
   };
 
   const formatPrice = (price: string, unit: string) => {
-    return `$${parseFloat(price).toFixed(2)}/${unit}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits:0 }) }/${unit}`;
   };
 
   return (
@@ -118,7 +118,7 @@ export default function ProductSearch({
       <Card className="p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Search className="w-4 h-4 text-muted-foreground" />
-          <Label className="text-sm font-medium">Product Search</Label>
+          <Label className="text-sm font-medium">Buscar producto</Label>
         </div>
         
         <div className="relative">
@@ -178,7 +178,7 @@ export default function ProductSearch({
                           {formatPrice(product.pricePerUnit, product.unit)}
                           {parseFloat(product.taxRate) > 0 && (
                             <span className="ml-2">
-                              ({parseFloat(product.taxRate)}% tax)
+                              ({parseFloat(product.taxRate)}% IVA)
                             </span>
                           )}
                         </div>
@@ -198,13 +198,13 @@ export default function ProductSearch({
 
         {searchQuery && searchResults.length === 0 && !isLoading && (
           <div className="text-sm text-muted-foreground text-center py-2">
-            No products found matching "{searchQuery}"
+            No se encontraron productos con el criterio de búsqueda "{searchQuery}"
           </div>
         )}
 
         {isLoading && searchQuery && (
           <div className="text-sm text-muted-foreground text-center py-2">
-            Searching...
+            Buscando...
           </div>
         )}
       </Card>
