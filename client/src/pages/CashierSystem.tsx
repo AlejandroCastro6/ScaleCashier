@@ -101,6 +101,22 @@ export default function CashierSystem() {
     setCurrentWeight(weight);
   };
 
+
+  const roundCOP = (value: number) => {
+    const reminder = value % 100;
+    if (reminder === 0) {
+      return value;
+    } else if (reminder < 50) {
+      return value - reminder + 50;
+    }
+    else if (reminder === 50) {
+      return value;
+    } else {
+      return value -reminder + 100
+    }
+  }
+
+
   const handleSelectProduct = (product: Product) => {
     if (currentWeight <= 0) {
       toast({
@@ -110,11 +126,18 @@ export default function CashierSystem() {
       });
       return;
     }
+    let subtotal
+    if (product.unit === "g") {
+      subtotal = (currentWeight * 1000) * parseFloat(product.pricePerUnit);
+    } else {
+      subtotal = currentWeight * parseFloat(product.pricePerUnit);
+    }
 
-    const subtotal = currentWeight * parseFloat(product.pricePerUnit);
+    // subtotal = roundCOP(subtotal);
     const taxRate = parseFloat(product.taxRate);
     const taxAmount = subtotal * (taxRate / 100);
-    const total = subtotal + taxAmount;
+    let total = subtotal + taxAmount;
+    total = roundCOP(total);
 
     const cartItem: CartItem = {
       productId: product.id,
@@ -133,8 +156,8 @@ export default function CashierSystem() {
     setSelectedProduct(product);
     
     toast({
-      title: "Product Added",
-      description: `${product.name} (${currentWeight.toFixed(3)} ${product.unit}) added to cart.`,
+      title: "Producto añadido",
+      description: `${product.name} (${currentWeight.toFixed(4)} ${product.unit}) agregado al carrito.`,
     });
 
     console.log("Product added to cart:", cartItem);
@@ -143,8 +166,8 @@ export default function CashierSystem() {
   const handleRemoveCartItem = (index: number) => {
     setCartItems(prev => prev.filter((_, i) => i !== index));
     toast({
-      title: "Item Removed",
-      description: "Item removed from cart.",
+      title: "Item removido",
+      description: "Item removido del carrito.",
     });
   };
 
@@ -152,16 +175,16 @@ export default function CashierSystem() {
     setCartItems([]);
     setSelectedProduct(null);
     toast({
-      title: "Cart Cleared",
-      description: "All items removed from cart.",
+      title: "Carrito limpio",
+      description: "Todos los items fueron removidos del carrito.",
     });
   };
 
   const handleProcessTransaction = () => {
     if (cartItems.length === 0) {
       toast({
-        title: "Empty Cart",
-        description: "Add items to cart before processing transaction.",
+        title: "Carrito vacío",
+        description: "Agrega items al carrito para procesar la transacción.",
         variant: "destructive",
       });
       return;
@@ -200,15 +223,15 @@ export default function CashierSystem() {
         setIsPaymentModalOpen(false);
 
         toast({
-          title: "Transaction Complete",
-          description: `Transaction processed successfully. Change: $${change.toFixed(2)}`,
+          title: "Transación completada",
+          description: `Transacción procesada correctamente. Cambio: $${change.toFixed(0)}`,
         });
       },
       onError: (error) => {
-        console.error("Transaction error:", error);
+        console.error("Error en la transsacción:", error);
         toast({
-          title: "Transaction Failed",
-          description: "Failed to process transaction. Please try again.",
+          title: "Transacción fallida",
+          description: "Fallo al procesar la transacción. Pro favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -219,15 +242,15 @@ export default function CashierSystem() {
     createProductMutation.mutate(product, {
       onSuccess: () => {
         toast({
-          title: "Product Added",
-          description: `${product.name} has been added to the product list.`,
+          title: "Producto añadido",
+          description: `${product.name} se ha añadido a la lista de productos.`,
         });
       },
       onError: (error) => {
         console.error("Product creation error:", error);
         toast({
-          title: "Product Creation Failed",
-          description: "Failed to create product. Please try again.",
+          title: "Creación de producto Fallida",
+          description: "Creacion de producto fallida. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -238,15 +261,15 @@ export default function CashierSystem() {
     updateProductMutation.mutate({ id: productId, product: productData }, {
       onSuccess: () => {
         toast({
-          title: "Product Updated",
-          description: "Product has been updated successfully.",
+          title: "Producto acutalizado",
+          description: "El producto ha sido actualizado con éxito.",
         });
       },
       onError: (error) => {
         console.error("Product update error:", error);
         toast({
-          title: "Product Update Failed",
-          description: "Failed to update product. Please try again.",
+          title: "Actualización Fallida",
+          description: "Actualización fallida. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }
@@ -257,15 +280,15 @@ export default function CashierSystem() {
     deleteProductMutation.mutate(productId, {
       onSuccess: () => {
         toast({
-          title: "Product Deleted",
-          description: "Product has been removed from the list.",
+          title: "Producto Borrado",
+          description: "El producto ha sido removido de la lista.",
         });
       },
       onError: (error) => {
         console.error("Product deletion error:", error);
         toast({
-          title: "Product Deletion Failed",
-          description: "Failed to delete product. Please try again.",
+          title: "Borrado Fallido",
+          description: "Fallo al borrar el producto. Por favor intente nuevamente.",
           variant: "destructive",
         });
       }

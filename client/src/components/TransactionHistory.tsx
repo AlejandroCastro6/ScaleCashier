@@ -26,7 +26,8 @@ export default function TransactionHistory({
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const formatPrice = (price: string | number) => {
-    return `$${parseFloat(price.toString()).toFixed(2)}`;
+    const value = parseFloat(price.toString());
+    return `$${ value.toLocaleString("es-CO", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) }`;
   };
 
   const formatDateTime = (date: Date | string) => {
