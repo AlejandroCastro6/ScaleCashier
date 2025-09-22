@@ -200,7 +200,7 @@ export default function CashierSystem() {
       amountReceived: amountReceived.toString(),
       change: change.toString(),
       itemCount: cartItems.length,
-      cashierName: "John Doe",
+      cashierName: "Molino Turó",
     };
 
     const items = cartItems.map(item => ({
