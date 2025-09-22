@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,8 +23,15 @@ export default function TransactionHistory({
   transactions, 
   onViewReceipt 
 }: TransactionHistoryProps) {
-  const [searchDate, setSearchDate] = useState("");
+  const today = format(new Date(), "yyyy-MM-dd");
+  const [searchDate, setSearchDate] = useState(today);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const { data: transactionDetails } = useQuery<TransactionWithItems>({
+    queryKey: ['/api/transactions', expandedId],
+    queryFn: () => fetch(`/api/transactions/${expandedId}`).then(res => res.json()),
+    enabled: !!expandedId, // only fetch when expandedId is set
+  });
 
   const formatPrice = (price: string | number) => {
     const value = parseFloat(price.toString());
@@ -161,11 +169,11 @@ export default function TransactionHistory({
                     </div>
                   </div>
 
-                  {/* Expanded Transaction Details */}
+                  {/* Expanded Transaction Details */}transactions
                   {expandedId === transaction.id && (
                     <div className="space-y-2 pt-2 border-t">
                       <div className="space-y-1">
-                        {transaction.items.map((item, index) => (
+                        {transactionDetails?.items?.map((item, index) => (
                           <div 
                             key={item.id || index} 
                             className="flex justify-between text-sm"

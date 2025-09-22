@@ -19,9 +19,7 @@ export default function TransactionCart({
   onProcessTransaction 
 }: TransactionCartProps) {
   const roundCOP = (value: number) => {
-    console.log(value, " el value")
     const reminder = value % 100;
-    console.log(reminder, " remindore")
     if (reminder === 0) {
       return value;
     } else if (reminder < 50) {
@@ -106,7 +104,7 @@ export default function TransactionCart({
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Scale className="w-3 h-3" />
                   <span data-testid={`text-item-weight-${index}`}>
-                    {formatWeight(item.weight, item.unit)}
+                    {formatWeight(item.weight)}
                   </span>
                 </div>
                 <span className="text-muted-foreground">
