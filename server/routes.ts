@@ -2,11 +2,9 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertProductSchema, insertTransactionSchema, insertTransactionItemSchema, createTransactionItemSchema } from "@shared/schema";
-import { getWeight } from "./weightController.ts";
+import { insertProductSchema, insertTransactionSchema, createTransactionItemSchema } from "@shared/schema";
 import { WebSocketServer } from "ws"
-import { getWeightStream } from "./weightController.ts";
-import { data } from "autoprefixer";
+import { onWeightUpdate } from "./weightController.ts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check route
@@ -151,27 +149,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
-  const wss = new WebSocketServer({ server: httpServer })
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" })
 
   wss.on("connection", (ws) => {
-    console.log("Client connected to the scale")
+    // console.log("Client connected to the scale")
     ws.on("close", () => {
-      console.log("Client disconnected from the scale")
+      // console.log("Client disconnected from the scale")
     })
   })
-  function broadcast(data: any) {
-    const message = JSON.stringify(data);
+
+  onWeightUpdate ((weight)=>{
+    const msg = JSON.stringify({ type: "weight", weight });
     wss.clients.forEach((client) => {
-      if (client.readyState === client.OPEN) {
-        client.send(message);
+      if (client.readyState === 1) {
+        // console.log(msg, " fiooooooooo")
+        client.send(msg);
       }
     })
-  }
-
-  getWeightStream().on("data", (weight)=>{
-    console.log(weight, " from the wesocketttt");
-    broadcast({ type: "weight", weight });
   })
-
   return httpServer;
 }

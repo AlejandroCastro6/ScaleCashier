@@ -1,6 +1,5 @@
 import { SerialPort } from "serialport"
 import { ReadlineParser } from "@serialport/parser-readline"
-import { EventEmitter } from "events";
 
 const port = new SerialPort({
   path: "COM6",
@@ -17,7 +16,6 @@ port.on("error", (err) => {
 
 const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }))
 
-const emitter = new EventEmitter()
 
 let lastestWeight = 0
 let subscribers: ((w:number)=>void)[] = [];
@@ -27,13 +25,13 @@ parser.on("data", (line) => {
   if (match) {
     const weight = parseFloat(match[0]);
     lastestWeight = weight
-    subscribers.forEach(cb => cb(weight))
-    console.log("weight:", lastestWeight)
+    subscribers.forEach(cb => cb(weight!))
+    // console.log("weight:", lastestWeight)
   }
 })
 
-export function getWeightStream() {
-  return emitter
+export function onWeightUpdate(callback:(weight:number) => void) {
+  subscribers.push(callback)
 }
 
 export function getWeight() {

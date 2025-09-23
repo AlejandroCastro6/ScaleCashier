@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Scale, Plug2, Unplug, RotateCcw } from "lucide-react";
+import { Scale, Plug2, Unplug } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { apiRequest } from "@/lib/queryClient.ts";
 
 interface WeightDisplayProps {
   onWeightChange?: (weight: number) => void;
@@ -54,6 +53,7 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
     }
   };
 
+  //By FRONT
   // useEffect(() => {
   //   if (!serialPort) return;
   //
@@ -95,6 +95,7 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
   //   };
   // }, [serialPort, onWeightChange]);
 
+  //By API
   // useEffect(() => {
   //   const interval = setInterval(async () => {
   //     const res = await apiRequest("GET","/api/scale/weight")
@@ -110,36 +111,44 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
   // }, []);
 
   useEffect(() => {
-    const ws =  new WebSocket("ws://localhost:5000");
-    ws.onopen=()=>{
-      console.log("Connection opened ws");
-    }
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    const url = port ? `${ protocol }://${ hostname }:${ port }/ws` : `${ protocol }://${ hostname }/ws`;
+    const ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      setIsConnected(true);
+      // console.log("Connection opened ws");
+    };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === "weight") {
-          setWeight(weight);
+        if (data.type === "weight" && typeof data.weight === "number") {
+          setWeight(data.weight);
+          onWeightChange?.(data.weight);
         }
-      }catch (e) {
-        console.error("Fail to get the message form the web socket",e);
+      } catch (e) {
+        console.error("Fail to parse WS message", e, event.data);
       }
-    }
+    };
 
-    ws.onerror=(err)=>{
-      console.log("Connection failed ws",err)
-    }
+    ws.onerror = (err) => {
+      console.error("Connection failed ws", err);
+    };
 
-    ws.close=()=>{
-      console.log("Disconnected from the scale web Socket")
-    }
+    ws.onclose = () => {
+      // console.log("Disconnected from the scale web Socket");
+    };
 
-    return () => ws.close();
-  }, []);
+    return () => {
+      ws.close();
+    };
+  }, [onWeightChange]);
 
   const disconnectScale = async () => {
     if (serialPort) {
-    console.log(serialPort, " el puero pue")
       try{
       await serialPort.close();
         console.log("Scale disconnected");
@@ -205,23 +214,23 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
           </Button>
         ) : (
           <>
-            <Button
-              onClick={ tareScale }
-              variant="outline"
-              size="lg"
-              data-testid="button-tare-scale"
-            >
-              <RotateCcw className="w-4 h-4 mr-2"/>
-              Tare
-            </Button>
-            <Button
-              onClick={ disconnectScale }
-              variant="outline"
-              size="lg"
-              data-testid="button-disconnect-scale"
-            >
-              Desconectar
-            </Button>
+            {/*<Button*/}
+            {/*  onClick={ tareScale }*/}
+            {/*  variant="outline"*/}
+            {/*  size="lg"*/}
+            {/*  data-testid="button-tare-scale"*/}
+            {/*>*/}
+            {/*  <RotateCcw className="w-4 h-4 mr-2"/>*/}
+            {/*  Tare*/}
+            {/*</Button>*/}
+            {/*<Button*/}
+            {/*  onClick={ disconnectScale }*/}
+            {/*  variant="outline"*/}
+            {/*  size="lg"*/}
+            {/*  data-testid="button-disconnect-scale"*/}
+            {/*>*/}
+            {/*  Desconectar*/}
+            {/*</Button>*/}
           </>
         ) }
       </div>

@@ -35,7 +35,7 @@ export default function TransactionCart({
   subtotalSum = roundCOP(subtotalSum)
   const taxSum = items.reduce((sum, item) => sum + item.taxAmount, 0);
   const total = items.reduce((sum, item) => sum + item.total, 0);
-  console.log("subtotalsum",subtotalSum," tax sum:", taxSum, " total:",total);
+  // console.log("subtotalsum",subtotalSum," tax sum:", taxSum, " total:",total);
   const itemCount = items.length;
 
   const formatWeight = (weight: number) => {
