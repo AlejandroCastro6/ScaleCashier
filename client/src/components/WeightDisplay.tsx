@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Scale, Plug2, Unplug, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { apiRequest } from "@/lib/queryClient.ts";
 
 interface WeightDisplayProps {
   onWeightChange?: (weight: number) => void;
@@ -53,46 +54,88 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
     }
   };
 
+  // useEffect(() => {
+  //   if (!serialPort) return;
+  //
+  //   const reader = serialPort.readable.getReader();
+  //   const decoder = new TextDecoder();
+  //   let cancelled = false;
+  //
+  //   const readLoop = async () => {
+  //     try {
+  //       while (!cancelled) {
+  //         const { value, done } = await reader.read();
+  //         if (done) {
+  //           console.log("Port close by device");
+  //           break;
+  //         }
+  //         if (value) {
+  //           const raw = decoder.decode(value);
+  //           // console.log("Raw data from scale:", raw);
+  //
+  //           // Example parsing: extract first number
+  //           const match = raw.match(/([0-9]*\.?[0-9]+)/);
+  //           if (match) {
+  //             const parsed = parseFloat(match[1]);
+  //             setWeight(parsed);
+  //             onWeightChange?.(parsed);
+  //           }
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error("Error reading from scale:", err);
+  //     } finally {
+  //       reader.releaseLock();
+  //     }
+  //   };
+  //   readLoop();
+  //   return () => {
+  //     cancelled = true;
+  //     reader.releaseLock();
+  //   };
+  // }, [serialPort, onWeightChange]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     const res = await apiRequest("GET","/api/scale/weight")
+  //     console.log(res, " res");
+  //     if (res.status === 200) {
+  //       const { weight } = await res.json();
+  //       if (weight){
+  //         setWeight(weight);
+  //       }
+  //     }
+  //   }, 500);
+  //   return () => clearInterval(interval);
+  // }, []);
+
   useEffect(() => {
-    if (!serialPort) return;
+    const ws =  new WebSocket("ws://localhost:5000");
+    ws.onopen=()=>{
+      console.log("Connection opened ws");
+    }
 
-    const reader = serialPort.readable.getReader();
-    const decoder = new TextDecoder();
-    let cancelled = false;
-
-    const readLoop = async () => {
+    ws.onmessage = (event) => {
       try {
-        while (!cancelled) {
-          const { value, done } = await reader.read();
-          if (done) {
-            console.log("Port close by device");
-            break;
-          }
-          if (value) {
-            const raw = decoder.decode(value);
-            // console.log("Raw data from scale:", raw);
-
-            // Example parsing: extract first number
-            const match = raw.match(/([0-9]*\.?[0-9]+)/);
-            if (match) {
-              const parsed = parseFloat(match[1]);
-              setWeight(parsed);
-              onWeightChange?.(parsed);
-            }
-          }
+        const data = JSON.parse(event.data);
+        if (data.type === "weight") {
+          setWeight(weight);
         }
-      } catch (err) {
-        console.error("Error reading from scale:", err);
-      } finally {
-        reader.releaseLock();
+      }catch (e) {
+        console.error("Fail to get the message form the web socket",e);
       }
-    };
-    readLoop();
-    return () => {
-      cancelled = true;
-      reader.releaseLock();
-    };
-  }, [serialPort, onWeightChange]);
+    }
+
+    ws.onerror=(err)=>{
+      console.log("Connection failed ws",err)
+    }
+
+    ws.close=()=>{
+      console.log("Disconnected from the scale web Socket")
+    }
+
+    return () => ws.close();
+  }, []);
 
   const disconnectScale = async () => {
     if (serialPort) {

@@ -3,12 +3,21 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
 import { insertProductSchema, insertTransactionSchema, insertTransactionItemSchema, createTransactionItemSchema } from "@shared/schema";
+import { getWeight } from "./weightController.ts";
+import { WebSocketServer } from "ws"
+import { getWeightStream } from "./weightController.ts";
+import { data } from "autoprefixer";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check route
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+
+  // Weight API route
+  // app.get("/api/scale/weight", async (req, res) => {
+  //   res.json({ weight: getWeight() });
+  // });
 
   // Product routes
   app.get("/api/products", async (req, res) => {
@@ -141,6 +150,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+
+  const wss = new WebSocketServer({ server: httpServer })
+
+  wss.on("connection", (ws) => {
+    console.log("Client connected to the scale")
+    ws.on("close", () => {
+      console.log("Client disconnected from the scale")
+    })
+  })
+  function broadcast(data: any) {
+    const message = JSON.stringify(data);
+    wss.clients.forEach((client) => {
+      if (client.readyState === client.OPEN) {
+        client.send(message);
+      }
+    })
+  }
+
+  getWeightStream().on("data", (weight)=>{
+    console.log(weight, " from the wesocketttt");
+    broadcast({ type: "weight", weight });
+  })
 
   return httpServer;
 }
