@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Scale, Plug2, Unplug, RotateCcw } from "lucide-react";
+import { Scale, Plug2, Unplug } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -53,50 +53,102 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
     }
   };
 
+  //By FRONT
+  // useEffect(() => {
+  //   if (!serialPort) return;
+  //
+  //   const reader = serialPort.readable.getReader();
+  //   const decoder = new TextDecoder();
+  //   let cancelled = false;
+  //
+  //   const readLoop = async () => {
+  //     try {
+  //       while (!cancelled) {
+  //         const { value, done } = await reader.read();
+  //         if (done) {
+  //           console.log("Port close by device");
+  //           break;
+  //         }
+  //         if (value) {
+  //           const raw = decoder.decode(value);
+  //           // console.log("Raw data from scale:", raw);
+  //
+  //           // Example parsing: extract first number
+  //           const match = raw.match(/([0-9]*\.?[0-9]+)/);
+  //           if (match) {
+  //             const parsed = parseFloat(match[1]);
+  //             setWeight(parsed);
+  //             onWeightChange?.(parsed);
+  //           }
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.error("Error reading from scale:", err);
+  //     } finally {
+  //       reader.releaseLock();
+  //     }
+  //   };
+  //   readLoop();
+  //   return () => {
+  //     cancelled = true;
+  //     reader.releaseLock();
+  //   };
+  // }, [serialPort, onWeightChange]);
+
+  //By API
+  // useEffect(() => {
+  //   const interval = setInterval(async () => {
+  //     const res = await apiRequest("GET","/api/scale/weight")
+  //     console.log(res, " res");
+  //     if (res.status === 200) {
+  //       const { weight } = await res.json();
+  //       if (weight){
+  //         setWeight(weight);
+  //       }
+  //     }
+  //   }, 500);
+  //   return () => clearInterval(interval);
+  // }, []);
+
   useEffect(() => {
-    if (!serialPort) return;
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    const url = port ? `${ protocol }://${ hostname }:${ port }/ws` : `${ protocol }://${ hostname }/ws`;
+    const ws = new WebSocket(url);
 
-    const reader = serialPort.readable.getReader();
-    const decoder = new TextDecoder();
-    let cancelled = false;
+    ws.onopen = () => {
+      setIsConnected(true);
+      // console.log("Connection opened ws");
+    };
 
-    const readLoop = async () => {
+    ws.onmessage = (event) => {
       try {
-        while (!cancelled) {
-          const { value, done } = await reader.read();
-          if (done) {
-            console.log("Port close by device");
-            break;
-          }
-          if (value) {
-            const raw = decoder.decode(value);
-            // console.log("Raw data from scale:", raw);
-
-            // Example parsing: extract first number
-            const match = raw.match(/([0-9]*\.?[0-9]+)/);
-            if (match) {
-              const parsed = parseFloat(match[1]);
-              setWeight(parsed);
-              onWeightChange?.(parsed);
-            }
-          }
+        const data = JSON.parse(event.data);
+        if (data.type === "weight" && typeof data.weight === "number") {
+          setWeight(data.weight);
+          onWeightChange?.(data.weight);
         }
-      } catch (err) {
-        console.error("Error reading from scale:", err);
-      } finally {
-        reader.releaseLock();
+      } catch (e) {
+        console.error("Fail to parse WS message", e, event.data);
       }
     };
-    readLoop();
-    return () => {
-      cancelled = true;
-      reader.releaseLock();
+
+    ws.onerror = (err) => {
+      console.error("Connection failed ws", err);
     };
-  }, [serialPort, onWeightChange]);
+
+    ws.onclose = () => {
+      // console.log("Disconnected from the scale web Socket");
+    };
+
+    return () => {
+      ws.close();
+    };
+  }, [onWeightChange]);
 
   const disconnectScale = async () => {
     if (serialPort) {
-    console.log(serialPort, " el puero pue")
       try{
       await serialPort.close();
         console.log("Scale disconnected");
@@ -162,23 +214,23 @@ export default function WeightDisplay({ onWeightChange, unit = "kg" }: WeightDis
           </Button>
         ) : (
           <>
-            <Button
-              onClick={ tareScale }
-              variant="outline"
-              size="lg"
-              data-testid="button-tare-scale"
-            >
-              <RotateCcw className="w-4 h-4 mr-2"/>
-              Tare
-            </Button>
-            <Button
-              onClick={ disconnectScale }
-              variant="outline"
-              size="lg"
-              data-testid="button-disconnect-scale"
-            >
-              Desconectar
-            </Button>
+            {/*<Button*/}
+            {/*  onClick={ tareScale }*/}
+            {/*  variant="outline"*/}
+            {/*  size="lg"*/}
+            {/*  data-testid="button-tare-scale"*/}
+            {/*>*/}
+            {/*  <RotateCcw className="w-4 h-4 mr-2"/>*/}
+            {/*  Tare*/}
+            {/*</Button>*/}
+            {/*<Button*/}
+            {/*  onClick={ disconnectScale }*/}
+            {/*  variant="outline"*/}
+            {/*  size="lg"*/}
+            {/*  data-testid="button-disconnect-scale"*/}
+            {/*>*/}
+            {/*  Desconectar*/}
+            {/*</Button>*/}
           </>
         ) }
       </div>

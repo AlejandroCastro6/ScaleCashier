@@ -2,13 +2,20 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
 import { storage } from "./storage";
-import { insertProductSchema, insertTransactionSchema, insertTransactionItemSchema, createTransactionItemSchema } from "@shared/schema";
+import { insertProductSchema, insertTransactionSchema, createTransactionItemSchema } from "@shared/schema";
+import { WebSocketServer } from "ws"
+import { onWeightUpdate } from "./weightController.ts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check route
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
+
+  // Weight API route
+  // app.get("/api/scale/weight", async (req, res) => {
+  //   res.json({ weight: getWeight() });
+  // });
 
   // Product routes
   app.get("/api/products", async (req, res) => {
@@ -142,5 +149,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
 
+  const wss = new WebSocketServer({ server: httpServer, path: "/ws" })
+
+  wss.on("connection", (ws) => {
+    // console.log("Client connected to the scale")
+    ws.on("close", () => {
+      // console.log("Client disconnected from the scale")
+    })
+  })
+
+  onWeightUpdate ((weight)=>{
+    const msg = JSON.stringify({ type: "weight", weight });
+    wss.clients.forEach((client) => {
+      if (client.readyState === 1) {
+        // console.log(msg, " fiooooooooo")
+        client.send(msg);
+      }
+    })
+  })
   return httpServer;
 }
