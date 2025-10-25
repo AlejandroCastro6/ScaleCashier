@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { insertProductSchema, insertTransactionSchema, createTransactionItemSchema } from "@shared/schema";
 import { WebSocketServer } from "ws"
 import { onWeightUpdate } from "./weightController.ts";
+import {generateAllProductQRs, generateProductQR} from "./QRController.ts";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check route
@@ -71,6 +72,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to delete product" });
     }
   });
+
+  app.post("/api/generateAllQRs", async (req, res) => {
+    try {
+      const resp = await generateAllProductQRs()
+      res.status(200).json(resp);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  app.post("/api/generateQR/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      if(!id) return res.status(400).json({ error: "Invalid id" });
+      const resp = await generateProductQR(id)
+      res.status(200).json(resp);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
 
   // Transaction routes
   app.get("/api/transactions", async (req, res) => {
@@ -146,6 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to search products" });
     }
   });
+
 
   const httpServer = createServer(app);
 

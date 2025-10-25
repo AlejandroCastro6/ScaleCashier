@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, timestamp, integer, json } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, decimal, timestamp, integer } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -15,6 +15,7 @@ export const products = pgTable("products", {
   taxRate: decimal("tax_rate", { precision: 5, scale: 2 }).notNull().default("0"), // Tax rate as percentage (0%, 5%, 19%)
   isActive: integer("is_active").notNull().default(1), // 1 for active, 0 for inactive
   createdAt: timestamp("created_at").defaultNow(),
+  qrUrlData: text("qr_url_data")
 });
 
 // Transaction line items
