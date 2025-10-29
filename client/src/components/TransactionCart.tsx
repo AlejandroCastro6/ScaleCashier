@@ -59,6 +59,53 @@ export default function TransactionCart({
         </Badge>
       </div>
 
+      {/* Total and Actions */}
+      {items.length > 0 && (
+          <div className="space-y-4 pt-4 border-t">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal:</span>
+                <span data-testid="text-cart-subtotal">
+                {formatPrice(subtotalSum)}
+              </span>
+              </div>
+              {taxSum > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total Impuestos:</span>
+                    <span data-testid="text-cart-tax">
+                  {formatPrice(taxSum)}
+                </span>
+                  </div>
+              )}
+              <Separator />
+              <div className="flex justify-between items-center">
+                <span className="text-lg font-medium">Total:</span>
+                <span className="text-2xl font-bold text-primary" data-testid="text-cart-total">
+                {formatPrice(total)}
+              </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                  variant="outline"
+                  onClick={onClearCart}
+                  data-testid="button-clear-cart"
+              >
+                Limpiar Carrito
+              </Button>
+              <Button
+                  onClick={onProcessTransaction}
+                  className="flex items-center gap-2"
+                  data-testid="button-process-transaction"
+              >
+                <Receipt className="w-4 h-4" />
+                Facturar
+              </Button>
+            </div>
+          </div>
+      )}
+
       {/* Cart Items */}
       <div className="flex-1 space-y-3 min-h-0 overflow-y-auto">
         {items.length === 0 ? (
@@ -140,53 +187,6 @@ export default function TransactionCart({
           ))
         )}
       </div>
-
-      {/* Total and Actions */}
-      {items.length > 0 && (
-        <div className="space-y-4 pt-4 border-t">
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Subtotal:</span>
-              <span data-testid="text-cart-subtotal">
-                {formatPrice(subtotalSum)}
-              </span>
-            </div>
-            {taxSum > 0 && (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total Impuestos:</span>
-                <span data-testid="text-cart-tax">
-                  {formatPrice(taxSum)}
-                </span>
-              </div>
-            )}
-            <Separator />
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-medium">Total:</span>
-              <span className="text-2xl font-bold text-primary" data-testid="text-cart-total">
-                {formatPrice(total)}
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              onClick={onClearCart}
-              data-testid="button-clear-cart"
-            >
-              Limpiar Carrito
-            </Button>
-            <Button 
-              onClick={onProcessTransaction}
-              className="flex items-center gap-2"
-              data-testid="button-process-transaction"
-            >
-              <Receipt className="w-4 h-4" />
-              Facturar
-            </Button>
-          </div>
-        </div>
-      )}
     </Card>
   );
 }
