@@ -19,18 +19,19 @@ export async function generateProductQR(productId: string) {
   try {
     // Fetch product info
     const { rows } = await client.query(
-        `SELECT id, name, qr_url_data FROM products WHERE id = $1`,
+        `SELECT id, name, qr_url_data, price_per_unit, tax_rate FROM products WHERE id = $1 AND qr_url_data IS NOT NULL;`,
         [productId]
     )
 
     if (!rows.length) throw new Error('Product not found')
     const product = rows[0]
-
+    const pricePlusTax = product.price_per_unit * (1 + (product.tax_rate/100))
+    console.log("Name: ", product.name, pricePlusTax," Price plus tax")
     // Format data for QR
     const qrDataUrl = product.qr_url_data
     console.log(`QR Data URL: ${qrDataUrl}`)
     // Create QR and save it
-    const filePath = `./qrcodes/product_${product.id}-${product.name}.png`
+    const filePath = `./qrcodes/product_${product.id}-${product.name}-price ${Math.round(pricePlusTax)}.png`
     await QRCode.toFile(filePath, qrDataUrl, { width: 300 })
 
     console.log(`✅ QR created for ${product.name} at ${filePath}`)
@@ -44,8 +45,8 @@ export async function generateProductQR(productId: string) {
 }
 
 export async function generateAllProductQRs() {
-  const {rows} = await pool.query(`SELECT id, name, qr_url_data
-                                   FROM products`)
+  const {rows} = await pool.query(`SELECT id
+                                   FROM products WHERE qr_url_data IS NOT NULL`)
   try {
     for (const row of rows) {
       await generateProductQR(row.id)
